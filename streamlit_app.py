@@ -21,7 +21,7 @@ st.title("First-Level Threat Analysis Dashboard")
 DATA_URL = "https://raw.githubusercontent.com/dnlaql/Visualize-threat/refs/heads/main/dataset/threat.csv"
 
 # Load the dataset
-@st.cache
+@st.cache_data
 def load_data(url):
     try:
         df = pd.read_csv(url)
@@ -96,7 +96,7 @@ if not df.empty:
 
     # Download Filtered Data
     st.subheader("Download Filtered Data")
-    @st.cache
+    @st.cache_data
     def convert_df_to_csv(df):
         return df.to_csv(index=False).encode("utf-8")
 
