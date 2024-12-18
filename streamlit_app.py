@@ -24,6 +24,9 @@ def filter_data(df, threat_type=None, start_date=None, end_date=None, engine=Non
     if threat_type:
         df = df[df['Threat'] == threat_type]
     if start_date and end_date:
+        # Convert start_date and end_date to datetime64
+        start_date = pd.to_datetime(start_date)
+        end_date = pd.to_datetime(end_date)
         df = df[(df['Time Detected'] >= start_date) & (df['Time Detected'] <= end_date)]
     if engine:
         df = df[df['Engine'] == engine]
