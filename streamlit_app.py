@@ -25,6 +25,7 @@ DATA_URL = "https://raw.githubusercontent.com/dnlaql/Visualize-threat/refs/heads
 def load_data(url):
     try:
         df = pd.read_csv(url)
+        df.columns = df.columns.str.strip()  # Remove leading/trailing spaces from column names
         return df
     except Exception as e:
         st.error(f"Error loading data: {e}")
