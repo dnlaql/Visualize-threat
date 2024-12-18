@@ -52,7 +52,10 @@ else:
     
     # Visualize correlations using a heatmap (for numerical columns)
     st.write("Correlation Heatmap")
-    corr_matrix = df.corr()
+    # Select only numeric columns for correlation
+    numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
+    corr_matrix = df[numeric_cols].corr()
+    
     plt.figure(figsize=(10, 8))
     sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt='.2f')
     st.pyplot()
