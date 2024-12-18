@@ -19,53 +19,50 @@ def load_data(url):
 
 df = load_data(DATA_URL)
 
-# Check if the dataset is loaded
-if df.empty:
-    st.error("The dataset could not be loaded.")
-else:
-    st.write("Dataset Overview")
-    st.write(df.head())  # Show first few rows
-    
-    # Data Types and Missing Values
-    st.write("Data Types and Missing Values")
-    st.write(df.info())
-    st.write("Missing Values per Column")
-    st.write(df.isnull().sum())
-    
-    # Descriptive Statistics
-    st.write("Descriptive Statistics")
-    st.write(df.describe())
-    
-    # Column-wise distribution of categorical variables
-    st.write("Threat Type Distribution")
-    st.bar_chart(df['Type'].value_counts())
-    
-    # Time analysis
-    st.write("Threat Detection Over Time")
-    df['Time Detected'] = pd.to_datetime(df['Time Detected'], errors='coerce')
-    time_detected = df.groupby(df['Time Detected'].dt.date).size()
-    st.line_chart(time_detected)
-    
-    # Bar chart for status
-    st.write("Threat Status Distribution")
-    st.bar_chart(df['Status'].value_counts())
-    
-    # Visualize correlations using a heatmap (for numerical columns)
-    st.write("Correlation Heatmap")
-    # Select only numeric columns for correlation
-    numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
-    corr_matrix = df[numeric_cols].corr()
-    
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt='.2f')
-    st.pyplot()
+# Filter function
+def filter_data(df, department=None, threat_type=None, engine=None):
+    if department:
+        df = df[df['IP Address'].apply(map_ip_to_department) == department]
+    if threat_type:
+        df = df[df['Threat'] == threat_type]
+    if engine:
+        df = df[df['Engine'] == engine]
+    return df
 
-    # Box plot for numerical features to check for outliers
-    st.write("Boxplot for Numerical Features")
-    numerical_cols = df.select_dtypes(include=['float64', 'int64']).columns
-    for col in numerical_cols:
-        plt.figure(figsize=(8, 6))
-        sns.boxplot(x=df[col])
-        st.pyplot()
-    
-    st.success("EDA completed successfully!")
+# Placeholder for selecting filters
+st.sidebar.header("Filters")
+department = st.sidebar.selectbox("Select Department", options=df['IP Address'].apply(map_ip_to_department).unique(), index=0)
+threat_type = st.sidebar.selectbox("Select Threat Type", options=df['Threat'].unique(), index=0)
+engine = st.sidebar.selectbox("Select Engine", options=df['Engine'].unique(), index=0)
+
+df_filtered = filter_data(df, department, threat_type, engine)
+
+# 1. Distribution of Threat Types
+st.write("Distribution of Threat Types")
+threat_type_counts = df_filtered['Threat'].value_counts()
+st.bar_chart(threat_type_counts)
+
+# 2. Time Series of Threat Detection
+st.write("Time Series of Threat Detection")
+df_filtered['Time Detected'] = pd.to_datetime(df_filtered['Time Detected'], errors='coerce')
+time_detected = df_filtered.groupby(df_filtered['Time Detected'].dt.date).size()
+st.line_chart(time_detected)
+
+# 3. Department vs Threat Type (Stacked Bar Chart)
+st.write("Department vs Threat Type")
+df_filtered['Department'] = df_filtered['IP Address'].apply(map_ip_to_department)  # Map IP to Department
+department_threat_counts = df_filtered.groupby(['Department', 'Threat']).size().unstack().fillna(0)
+st.bar_chart(department_threat_counts)
+
+# 4. Antivirus Engine Effectiveness
+st.write("Antivirus Engine Effectiveness")
+engine_threat_counts = df_filtered.groupby('Engine')['Status'].value_counts().unstack().fillna(0)
+st.bar_chart(engine_threat_counts)
+
+# Helper function to map IP to department (example)
+def map_ip_to_department(ip_address):
+    # Placeholder logic for mapping IP to departments
+    if ip_address.startswith("172.22"):
+        return "NICU DEPARTMENT"
+    else:
+        return "OTHER DEPARTMENT"
