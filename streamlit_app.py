@@ -20,9 +20,7 @@ def load_data(url):
 df = load_data(DATA_URL)
 
 # Filter function
-def filter_data(df, department=None, threat_type=None, engine=None):
-    if department:
-        df = df[df['IP Address'].apply(map_ip_to_department) == department]
+def filter_data(df, threat_type=None, engine=None):
     if threat_type:
         df = df[df['Threat'] == threat_type]
     if engine:
@@ -31,11 +29,10 @@ def filter_data(df, department=None, threat_type=None, engine=None):
 
 # Placeholder for selecting filters
 st.sidebar.header("Filters")
-department = st.sidebar.selectbox("Select Department", options=df['IP Address'].apply(map_ip_to_department).unique(), index=0)
 threat_type = st.sidebar.selectbox("Select Threat Type", options=df['Threat'].unique(), index=0)
 engine = st.sidebar.selectbox("Select Engine", options=df['Engine'].unique(), index=0)
 
-df_filtered = filter_data(df, department, threat_type, engine)
+df_filtered = filter_data(df, threat_type, engine)
 
 # 1. Distribution of Threat Types
 st.write("Distribution of Threat Types")
@@ -50,19 +47,11 @@ st.line_chart(time_detected)
 
 # 3. Department vs Threat Type (Stacked Bar Chart)
 st.write("Department vs Threat Type")
-df_filtered['Department'] = df_filtered['IP Address'].apply(map_ip_to_department)  # Map IP to Department
-department_threat_counts = df_filtered.groupby(['Department', 'Threat']).size().unstack().fillna(0)
+# Here, we'll show the distribution of threats per IP address instead of department
+department_threat_counts = df_filtered.groupby(['IP Address', 'Threat']).size().unstack().fillna(0)
 st.bar_chart(department_threat_counts)
 
 # 4. Antivirus Engine Effectiveness
 st.write("Antivirus Engine Effectiveness")
 engine_threat_counts = df_filtered.groupby('Engine')['Status'].value_counts().unstack().fillna(0)
 st.bar_chart(engine_threat_counts)
-
-# Helper function to map IP to department (example)
-def map_ip_to_department(ip_address):
-    # Placeholder logic for mapping IP to departments
-    if ip_address.startswith("172.22"):
-        return "NICU DEPARTMENT"
-    else:
-        return "OTHER DEPARTMENT"
