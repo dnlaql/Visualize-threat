@@ -31,12 +31,19 @@ def filter_data(df, threat_type=None, start_date=None, end_date=None, engine=Non
         df = df[df['Engine'] == engine]
     return df
 
-# Placeholder for selecting filters
+# Sidebar filters
 st.sidebar.header("Filters")
 threat_type = st.sidebar.selectbox("Select Threat Type", options=df['Type'].unique(), index=0)
 start_date = st.sidebar.date_input("Start Date", df['Time Detected'].min())
 end_date = st.sidebar.date_input("End Date", df['Time Detected'].max())
 engine = st.sidebar.selectbox("Select Engine", options=df['Engine'].unique(), index=0)
+
+# Reset button to clear filters
+if st.sidebar.button('Reset Filters'):
+    threat_type = None
+    start_date = df['Time Detected'].min()
+    end_date = df['Time Detected'].max()
+    engine = None
 
 df_filtered = filter_data(df, threat_type, start_date, end_date, engine)
 
