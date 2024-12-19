@@ -44,7 +44,7 @@ end_date = st.sidebar.date_input("End Date", df['Time Detected'].max())
 engine = st.sidebar.selectbox("Select Engine", options=["All"] + list(df['Engine'].unique()))
 
 # Filter and Reset Buttons
-if st.sidebar.button("Filter Data"):
+if st.sidebar.button("Search"):  # Renamed the button
     df_filtered = filter_data(df, threat_type, start_date, end_date, engine)
 else:
     df_filtered = df  # Default to full dataset
