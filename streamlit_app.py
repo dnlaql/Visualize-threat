@@ -96,14 +96,14 @@ if st.sidebar.button("Reset Filters"):
 #---------------------------------------------------------------------------------------------------------
 
 #---------------------------------------------------------------------------------------------------------
-# Calculate Resolution Time in Minutes
+# Calculate Resolution Time in Days
 # Ensure 'Time Created' and 'Time Fixed' are datetime
 df_filtered['Time Created'] = pd.to_datetime(df_filtered['Time Created'], errors='coerce')
 df_filtered['Time Fixed'] = pd.to_datetime(df_filtered['Time Fixed'], errors='coerce')
 
 # Calculate Resolution Time only if both times are present
 df_filtered = df_filtered.dropna(subset=['Time Created', 'Time Fixed'])
-df_filtered['Resolution Time'] = (df_filtered['Time Fixed'] - df_filtered['Time Created']).dt.total_seconds() / 60  # Resolution time in minutes
+df_filtered['Resolution Time'] = (df_filtered['Time Fixed'] - df_filtered['Time Created']).dt.total_seconds() / (3600 * 24)  # Resolution time in days
 #---------------------------------------------------------------------------------------------------------
 
 #---------------------------------------------------------------------------------------------------------
