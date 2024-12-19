@@ -96,18 +96,6 @@ if st.sidebar.button("Reset Filters"):
 #---------------------------------------------------------------------------------------------------------
 
 #---------------------------------------------------------------------------------------------------------
-# Calculate Resolution Time in Minutes
-# Ensure 'Time Created' and 'Time Fixed' are datetime
-df_filtered['Time Created'] = pd.to_datetime(df_filtered['Time Created'], errors='coerce')
-df_filtered['Time Fixed'] = pd.to_datetime(df_filtered['Time Fixed'], errors='coerce')
-
-# Calculate Resolution Time only if both times are present
-df_filtered = df_filtered.dropna(subset=['Time Created', 'Time Fixed'])
-df_filtered['Resolution Time'] = (df_filtered['Time Fixed'] - df_filtered['Time Created']).dt.total_seconds() / 60  # Resolution time in minutes
-df_filtered['Resolution Date'] = df_filtered['Time Fixed'].dt.date  # For daily grouping
-#---------------------------------------------------------------------------------------------------------
-
-#---------------------------------------------------------------------------------------------------------
 # EXPLORE DATA ANALYSIS INSIGHT
 
 # 1. Distribution of Threat Types
@@ -124,14 +112,4 @@ st.line_chart(time_detected)
 st.write("### Antivirus Engine Effectiveness")
 engine_threat_counts = df_filtered.groupby('Engine')['Status'].value_counts().unstack().fillna(0)
 st.bar_chart(engine_threat_counts)
-
-# 4. Threat Resolution Time by Engine (in minutes)
-st.write("### Threat Resolution Time by Engine (in minutes)")
-avg_resolution_time = df_filtered.groupby('Engine')['Resolution Time'].mean()
-st.bar_chart(avg_resolution_time)
-
-# 5. Threat Resolution Time by Date (Daily)
-st.write("### Threat Resolution Time by Date (Daily)")
-daily_resolution_time = df_filtered.groupby('Resolution Date')['Resolution Time'].mean()
-st.line_chart(daily_resolution_time)
 #---------------------------------------------------------------------------------------------------------
