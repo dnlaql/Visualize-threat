@@ -103,7 +103,7 @@ df_filtered['Time Fixed'] = pd.to_datetime(df_filtered['Time Fixed'], errors='co
 
 # Calculate Resolution Time only if both times are present
 df_filtered = df_filtered.dropna(subset=['Time Created', 'Time Fixed'])
-df_filtered['Resolution Time'] = (df_filtered['Time Fixed'] - df_filtered['Time Created']).dt.total_seconds() / 3600  # Resolution time in hours
+df_filtered['Resolution Time'] = (df_filtered['Time Fixed'] - df_filtered['Time Created']).dt.total_seconds() / 60  # Resolution time in minutes
 #---------------------------------------------------------------------------------------------------------
 
 #---------------------------------------------------------------------------------------------------------
