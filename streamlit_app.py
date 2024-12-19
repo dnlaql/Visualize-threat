@@ -1,13 +1,10 @@
-#---------------------------------------------------------------------------------------------------------
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-#---------------------------------------------------------------------------------------------------------
 
 # Dataset URL
 DATA_URL = "https://raw.githubusercontent.com/dnlaql/Visualize-threat/refs/heads/main/dataset/threat%20(1).csv"
 
-#---------------------------------------------------------------------------------------------------------
 # Load the dataset
 @st.cache_data
 def load_data(url):
@@ -21,9 +18,7 @@ def load_data(url):
         return pd.DataFrame()
 
 df = load_data(DATA_URL)
-#---------------------------------------------------------------------------------------------------------
 
-#---------------------------------------------------------------------------------------------------------
 # Filter function
 def filter_data(df, threat_type=None, start_date=None, end_date=None, engine=None):
     if threat_type and threat_type != "All":
@@ -35,9 +30,7 @@ def filter_data(df, threat_type=None, start_date=None, end_date=None, engine=Non
     if engine and engine != "All":
         df = df[df['Engine'] == engine]
     return df
-#---------------------------------------------------------------------------------------------------------
 
-#---------------------------------------------------------------------------------------------------------
 # Sidebar Filters
 st.sidebar.header("Filters")
 
@@ -93,10 +86,8 @@ if st.sidebar.button("Reset Filters"):
         "engine": "All",
     }
     df_filtered = df  # Reset to full dataset
-#---------------------------------------------------------------------------------------------------------
 
-#---------------------------------------------------------------------------------------------------------
-# EXPLORE DATA ANALYSIS INSIGHT
+# Explore Data Analysis Insight
 
 # 1. Distribution of Threat Types
 st.write("### Distribution of Threat Types")
@@ -112,4 +103,8 @@ st.line_chart(time_detected)
 st.write("### Antivirus Engine Effectiveness")
 engine_threat_counts = df_filtered.groupby('Engine')['Status'].value_counts().unstack().fillna(0)
 st.bar_chart(engine_threat_counts)
-#---------------------------------------------------------------------------------------------------------
+
+# 4. Engine Performance: Compare the number of threats detected by each engine
+st.write("### Engine Performance")
+engine_performance = df_filtered['Engine'].value_counts()
+st.bar_chart(engine_performance)
