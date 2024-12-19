@@ -96,7 +96,7 @@ if st.sidebar.button("Reset Filters"):
 #---------------------------------------------------------------------------------------------------------
 
 #---------------------------------------------------------------------------------------------------------
-# Calculate Resolution Time
+# Calculate Resolution Time in Minutes
 # Ensure 'Time Created' and 'Time Fixed' are datetime
 df_filtered['Time Created'] = pd.to_datetime(df_filtered['Time Created'], errors='coerce')
 df_filtered['Time Fixed'] = pd.to_datetime(df_filtered['Time Fixed'], errors='coerce')
