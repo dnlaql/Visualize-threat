@@ -43,15 +43,24 @@ start_date = st.sidebar.date_input("Start Date", df['Time Detected'].min())
 end_date = st.sidebar.date_input("End Date", df['Time Detected'].max())
 engine = st.sidebar.selectbox("Select Engine", options=["All"] + list(df['Engine'].unique()))
 
-# Filter and Reset Buttons
-if st.sidebar.button("Search"):  # Renamed the button
-    df_filtered = filter_data(df, threat_type, start_date, end_date, engine)
-else:
-    df_filtered = df  # Default to full dataset
-
-if st.sidebar.button("Reset Filters"):
-    st.experimental_rerun()  # Reset the app to its initial state
 #---------------------------------------------------------------------------------------------------------
+# Filter and Reset Buttons
+reset_triggered = st.sidebar.button("Reset Filters")
+
+if reset_triggered:
+    threat_type = "All"
+    start_date = df['Time Detected'].min()
+    end_date = df['Time Detected'].max()
+    engine = "All"
+else:
+    threat_type = st.sidebar.selectbox("Select Threat Type", options=["All"] + list(df['Type'].unique()))
+    start_date = st.sidebar.date_input("Start Date", df['Time Detected'].min())
+    end_date = st.sidebar.date_input("End Date", df['Time Detected'].max())
+    engine = st.sidebar.selectbox("Select Engine", options=["All"] + list(df['Engine'].unique()))
+
+df_filtered = filter_data(df, threat_type, start_date, end_date, engine)
+#---------------------------------------------------------------------------------------------------------
+
 
 #---------------------------------------------------------------------------------------------------------
 # EXPLORE DATA ANALYSIS INSIGHT
