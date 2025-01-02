@@ -36,23 +36,28 @@ if engine_filter:
 filtered_data = df[conditions]
 
 # Main dashboard title
-st.title('Threat Analysis Dashboard')
+st.title('Threat Monitoring and Analysis Dashboard 🛡️')
+
+# Description of the dashboard with emojis
 st.markdown("""
-This interactive dashboard provides a comprehensive overview of network security threats detected over time. 
-It is designed to help IT security analysts monitor threat activity, evaluate the effectiveness of security measures, 
-and make informed decisions based on data-driven insights. 
+Welcome to the Threat Monitoring and Analysis Dashboard! 🌍 This interactive tool provides a comprehensive overview 
+of network security threats detected over time, helping IT security analysts to monitor, analyze, and respond to 
+potential threats effectively. 🚀
 
 **Features:**
-- **Filter Data:** Users can dynamically filter the data based on date ranges, departments, threat types, statuses, and antivirus engines.
+- **Filter Data:** Users can dynamically filter the data based on date ranges, departments, threat types, statuses, 
+and antivirus engines. 🔍
 - **Visualizations Include:**
-  - Distribution of threat types.
-  - Time series analysis of threat detections.
-  - Status of threat resolutions.
-  - Antivirus engine effectiveness.
+  - Distribution of threat types 📊
+  - Time series analysis of threat detections ⏳
+  - Status of threat resolutions 📈
+  - Antivirus engine effectiveness 💻
   
 **Usage:**
-- Use the sidebar to apply different filters and interact with the visualizations.
-- Hover over graphs to see additional details or trends over time.
+- Use the sidebar to apply different filters and interact with the visualizations. 🎛️
+- Hover over graphs to see additional details or trends over time. 🔎
+
+Feel free to explore and customize the views to gain better insights into the security landscape. 🌐
 """)
 
 # Distribution of Threat Types
