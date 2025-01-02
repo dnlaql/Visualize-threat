@@ -2,12 +2,12 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Function to load data
-@st.cache
+# Using st.cache_data for loading and caching data
+@st.cache_data
 def load_data():
     url = 'https://raw.githubusercontent.com/dnlaql/Visualize-threat/refs/heads/main/dataset/updated_edr-threat_with_departments.csv'
     data = pd.read_csv(url)
-    data['Time Detected'] = pd.to_datetime(data['Time Detected'])  # Convert to datetime
+    data['Time Detected'] = pd.to_datetime(data['Time Detected'])
     return data
 
 df = load_data()
@@ -20,8 +20,8 @@ type_filter = st.sidebar.multiselect('Type', options=sorted(df['Type'].unique())
 status_filter = st.sidebar.multiselect('Status', options=sorted(df['Status'].unique()))
 engine_filter = st.sidebar.multiselect('Engine', options=sorted(df['Engine'].unique()))
 
-# Apply filters to data
-conditions = [True] * len(df)  # Default to all true
+# Apply filters
+conditions = True
 if date_range:
     conditions &= (df['Time Detected'] >= date_range[0]) & (df['Time Detected'] <= date_range[1])
 if department != 'All':
@@ -35,56 +35,30 @@ if engine_filter:
 
 filtered_data = df[conditions]
 
-# Main dashboard title
-st.title('Threat Monitoring and Analysis Dashboard 🛡️')
-
-# Description of the dashboard with emojis
+# Main dashboard title and description
+st.title('Threat Monitoring and Analysis Dashboard')
 st.markdown("""
-Welcome to the Threat Monitoring and Analysis Dashboard! 🌍 This interactive tool provides a comprehensive overview 
-of network security threats detected over time, helping IT security analysts to monitor, analyze, and respond to 
-potential threats effectively. 🚀
-
-**Features:**
-- **Filter Data:** Users can dynamically filter the data based on date ranges, departments, threat types, statuses, 
-and antivirus engines. 🔍
-- **Visualizations Include:**
-  - Distribution of threat types 📊
-  - Time series analysis of threat detections ⏳
-  - Status of threat resolutions 📈
-  - Antivirus engine effectiveness 💻
-  
-**Usage:**
-- Use the sidebar to apply different filters and interact with the visualizations. 🎛️
-- Hover over graphs to see additional details or trends over time. 🔎
-
-Feel free to explore and customize the views to gain better insights into the security landscape. 🌐
+Welcome to the interactive Threat Monitoring Dashboard. This tool provides insights into network security threats detected over time, allowing for effective monitoring and decision-making based on detailed data-driven insights.
 """)
 
 # Distribution of Threat Types
-st.subheader("Distribution of Threat Types")
-fig = px.bar(filtered_data, x='Type', title="Threat Types Distribution")
+fig = px.bar(filtered_data, x='Type', title="Distribution of Threat Types")
 st.plotly_chart(fig, use_container_width=True)
 
-# Time Series of Threat Detection
-st.subheader("Time Series of Threat Detection")
-time_series = filtered_data.groupby(filtered_data['Time Detected'].dt.date).size()
-fig_time = px.line(time_series, title='Daily Threats')
+# Time Series Analysis of Threat Detection
+fig_time = px.line(filtered_data.groupby(filtered_data['Time Detected'].dt.date).size(), title='Threats Over Time')
 st.plotly_chart(fig_time, use_container_width=True)
 
 # Status of Threat Resolutions
-st.subheader("Status of Threat Resolutions")
-status_counts = filtered_data['Status'].value_counts().reset_index()
-status_counts.columns = ['Status', 'Count']
-fig_status = px.pie(status_counts, values='Count', names='Status', title='Threat Resolution Status')
+fig_status = px.pie(filtered_data, names='Status', title='Status of Threat Resolutions')
 st.plotly_chart(fig_status, use_container_width=True)
 
 # Antivirus Engine Effectiveness
-st.subheader("Antivirus Engine Effectiveness")
-engine_effectiveness = filtered_data.groupby('Engine')['Status'].value_counts().unstack().fillna(0)
-fig_engine = px.bar(engine_effectiveness, barmode='group', title='Engine Effectiveness by Status')
+engine_status = filtered_data.groupby(['Engine', 'Status']).size().unstack().fillna(0)
+fig_engine = px.bar(engine_status, barmode='group', title='Engine Effectiveness by Status')
 st.plotly_chart(fig_engine, use_container_width=True)
 
-# Display the filtered data table
+# Display the filtered data
 st.subheader("Filtered Data")
 st.dataframe(filtered_data)
 
