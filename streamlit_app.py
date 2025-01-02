@@ -3,7 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-@st.memo
+# Using st.cache, which is supported in older and most newer versions
+@st.cache
 def load_data():
     url = 'https://raw.githubusercontent.com/dnlaql/Visualize-threat/refs/heads/main/dataset/updated_edr-threat_with_departments.csv'
     data = pd.read_csv(url)
