@@ -12,13 +12,36 @@ def load_data():
 
 df = load_data()
 
+# Initialize session state variables if not already set
+if 'date_range' not in st.session_state:
+    st.session_state['date_range'] = []
+if 'department' not in st.session_state:
+    st.session_state['department'] = 'All'
+if 'type_filter' not in st.session_state:
+    st.session_state['type_filter'] = []
+if 'status_filter' not in st.session_state:
+    st.session_state['status_filter'] = []
+if 'engine_filter' not in st.session_state:
+    st.session_state['engine_filter'] = []
+
 # Sidebar for filters
 st.sidebar.header('Filters 🎚️')
-date_range = st.sidebar.date_input("Date Range 📅", [])
-department = st.sidebar.selectbox('Department 🏢', ['All'] + sorted(df['Department'].unique()))
-type_filter = st.sidebar.multiselect('Type 🚨', options=sorted(df['Type'].unique()))
-status_filter = st.sidebar.multiselect('Status 📊', options=sorted(df['Status'].unique()))
-engine_filter = st.sidebar.multiselect('Engine 🖥️', options=sorted(df['Engine'].unique()))
+date_range = st.sidebar.date_input("Date Range 📅", key='date_range')
+department = st.sidebar.selectbox('Department 🏢', ['All'] + sorted(df['Department'].unique()), key='department')
+type_filter = st.sidebar.multiselect('Type 🚨', options=sorted(df['Type'].unique()), key='type_filter')
+status_filter = st.sidebar.multiselect('Status 📊', options=sorted(df['Status'].unique()), key='status_filter')
+engine_filter = st.sidebar.multiselect('Engine 🖥️', options=sorted(df['Engine'].unique()), key='engine_filter')
+
+def reset_filters():
+    st.session_state['date_range'] = []
+    st.session_state['department'] = 'All'
+    st.session_state['type_filter'] = []
+    st.session_state['status_filter'] = []
+    st.session_state['engine_filter'] = []
+
+# Button to reset filters
+if st.sidebar.button('Reset Filters 🔄'):
+    reset_filters()
 
 # Apply filters to the data based on user selections
 filtered_data = df.copy()
@@ -32,7 +55,6 @@ if status_filter:
     filtered_data = filtered_data[filtered_data['Status'].isin(status_filter)]
 if engine_filter:
     filtered_data = filtered_data[filtered_data['Engine'].isin(engine_filter)]
-
 # Dashboard title and introduction
 st.title('Threat Monitoring and Analysis Dashboard 🛡️')
 st.markdown("""
