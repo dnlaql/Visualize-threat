@@ -1,10 +1,11 @@
 import streamlit as st
 import pandas as pd
 
-# Load your data
+# Load your data from a GitHub URL
 @st.cache
 def load_data():
-    data = pd.read_csv('path_to_your_file.csv')
+    url = 'https://raw.githubusercontent.com/dnlaql/Visualize-threat/refs/heads/main/dataset/updated_edr-threat_with_departments.csv'
+    data = pd.read_csv(url)
     data['Time Detected'] = pd.to_datetime(data['Time Detected'])
     return data
 
