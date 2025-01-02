@@ -1,55 +1,74 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
+import plotly.express as px
 
-# Using st.cache, which is supported in older and most newer versions
+# Function to load data
 @st.cache
 def load_data():
     url = 'https://raw.githubusercontent.com/dnlaql/Visualize-threat/refs/heads/main/dataset/updated_edr-threat_with_departments.csv'
     data = pd.read_csv(url)
-    data['Time Detected'] = pd.to_datetime(data['Time Detected'])
+    data['Time Detected'] = pd.to_datetime(data['Time Detected'])  # Convert to datetime
     return data
 
 df = load_data()
 
+# Sidebar for user inputs and filters
 st.sidebar.header('Filters')
 date_range = st.sidebar.date_input("Date Range", [])
-department = st.sidebar.selectbox('Department', ['All'] + list(np.unique(df['Department'])))
-threat_type = st.sidebar.multiselect('Type', options=np.unique(df['Type']))
-status = st.sidebar.multiselect('Status', options=np.unique(df['Status']))
-engine = st.sidebar.multiselect('Engine', options=np.unique(df['Engine']))
+department = st.sidebar.selectbox('Department', ['All'] + sorted(df['Department'].unique()))
+type_filter = st.sidebar.multiselect('Type', options=sorted(df['Type'].unique()))
+status_filter = st.sidebar.multiselect('Status', options=sorted(df['Status'].unique()))
+engine_filter = st.sidebar.multiselect('Engine', options=sorted(df['Engine'].unique()))
 
-df_filtered = df
+# Apply filters to data
+conditions = [True] * len(df)  # Default to all true
 if date_range:
-    df_filtered = df_filtered[(df_filtered['Time Detected'] >= date_range[0]) & (df_filtered['Time Detected'] <= date_range[1])]
+    conditions &= (df['Time Detected'] >= date_range[0]) & (df['Time Detected'] <= date_range[1])
 if department != 'All':
-    df_filtered = df_filtered[df_filtered['Department'] == department]
-if threat_type:
-    df_filtered = df_filtered[df_filtered['Type'].isin(threat_type)]
-if status:
-    df_filtered = df_filtered[df_filtered['Status'].isin(status)]
-if engine:
-    df_filtered = df_filtered[df_filtered['Engine'].isin(engine)]
+    conditions &= (df['Department'] == department)
+if type_filter:
+    conditions &= df['Type'].isin(type_filter)
+if status_filter:
+    conditions &= df['Status'].isin(status_filter)
+if engine_filter:
+    conditions &= df['Engine'].isin(engine_filter)
 
+filtered_data = df[conditions]
+
+# Main dashboard title
 st.title('Threat Analysis Dashboard')
-st.write("### Distribution of Threat Types")
-threat_type_counts = df_filtered['Type'].value_counts()
-st.bar_chart(threat_type_counts)
 
-st.write("### Time Series Analysis of Threats")
-time_detected = df_filtered.groupby(df_filtered['Time Detected'].dt.date).size()
-st.line_chart(time_detected)
+# Distribution of Threat Types
+st.subheader("Distribution of Threat Types")
+fig = px.bar(filtered_data, x='Type', title="Threat Types Distribution")
+st.plotly_chart(fig, use_container_width=True)
 
-st.write("### Department Vulnerability Analysis")
-department_threats = df_filtered['Department'].value_counts()
-st.bar_chart(department_threats)
+# Time Series of Threat Detection
+st.subheader("Time Series of Threat Detection")
+time_series = filtered_data.groupby(filtered_data['Time Detected'].dt.date).size()
+fig_time = px.line(time_series, title='Daily Threats')
+st.plotly_chart(fig_time, use_container_width=True)
 
-st.write("### Status of Threat Resolutions")
-status_counts = df_filtered['Status'].value_counts()
-fig, ax = plt.subplots()
-ax.pie(status_counts, labels=status_counts.index, autopct='%1.1f%%', startangle=90)
-ax.axis('equal')
-st.pyplot(fig)
+# Status of Threat Resolutions
+st.subheader("Status of Threat Resolutions")
+status_counts = filtered_data['Status'].value_counts().reset_index()
+status_counts.columns = ['Status', 'Count']
+fig_status = px.pie(status_counts, values='Count', names='Status', title='Threat Resolution Status')
+st.plotly_chart(fig_status, use_container_width=True)
 
-st.write("### Filtered Data", df_filtered)
+# Antivirus Engine Effectiveness
+st.subheader("Antivirus Engine Effectiveness")
+engine_effectiveness = filtered_data.groupby('Engine')['Status'].value_counts().unstack().fillna(0)
+fig_engine = px.bar(engine_effectiveness, barmode='group', title='Engine Effectiveness by Status')
+st.plotly_chart(fig_engine, use_container_width=True)
+
+# Display the filtered data table
+st.subheader("Filtered Data")
+st.dataframe(filtered_data)
+
+# Reset button to clear filters
+if st.sidebar.button('Reset Filters'):
+    st.experimental_rerun()
+
+# Note on caching
+st.info('Data is cached for performance. Adjust filters to view different slices of data.')
