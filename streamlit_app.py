@@ -1,93 +1,35 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
 
-# Dataset URL
-DATA_URL = "https://raw.githubusercontent.com/dnlaql/Visualize-threat/refs/heads/main/dataset/threat%20(1).csv"
+# Load your data
+@st.cache
+def load_data():
+    data = pd.read_csv('path_to_your_file.csv')
+    data['Time Detected'] = pd.to_datetime(data['Time Detected'])
+    return data
 
-# Load the dataset
-@st.cache_data
-def load_data(url):
-    try:
-        df = pd.read_csv(url)
-        df.columns = df.columns.str.strip()  # Remove leading/trailing spaces from column names
-        df['Time Detected'] = pd.to_datetime(df['Time Detected'], errors='coerce')
-        return df
-    except Exception as e:
-        st.error(f"Error loading data: {e}")
-        return pd.DataFrame()
+df = load_data()
 
-df = load_data(DATA_URL)
+# Sidebar for filters
+st.sidebar.header('Filters')
+date_range = st.sidebar.date_input("Date range", [])
+department = st.sidebar.multiselect('Department', options=df['Department'].unique())
+threat_type = st.sidebar.multiselect('Type', options=df['Type'].unique())
+status = st.sidebar.multiselect('Status', options=df['Status'].unique())
+engine = st.sidebar.multiselect('Engine', options=df['Engine'].unique())
 
-# Filter function
-def filter_data(df, threat_type=None, start_date=None, end_date=None, engine=None):
-    if threat_type and threat_type != "All":
-        df = df[df['Type'] == threat_type]
-    if start_date and end_date:
-        start_date = pd.to_datetime(start_date)
-        end_date = pd.to_datetime(end_date)
-        df = df[(df['Time Detected'] >= start_date) & (df['Time Detected'] <= end_date)]
-    if engine and engine != "All":
-        df = df[df['Engine'] == engine]
-    return df
+# Apply filters
+df_filtered = df[(df['Department'].isin(department)) & 
+                 (df['Type'].isin(threat_type)) & 
+                 (df['Status'].isin(status)) & 
+                 (df['Engine'].isin(engine))]
 
-# Sidebar Filters
-st.sidebar.header("Filters")
+if date_range:
+    df_filtered = df_filtered[(df_filtered['Time Detected'].dt.date >= date_range[0]) & 
+                              (df_filtered['Time Detected'].dt.date <= date_range[1])]
 
-# Initialize filter states
-if "filters" not in st.session_state:
-    st.session_state.filters = {
-        "threat_type": "All",
-        "start_date": df['Time Detected'].min(),
-        "end_date": df['Time Detected'].max(),
-        "engine": "All",
-    }
-
-# Display filters
-threat_type = st.sidebar.selectbox(
-    "Select Threat Type", options=["All"] + list(df['Type'].unique()), index=0
-)
-start_date = st.sidebar.date_input("Start Date", st.session_state.filters["start_date"])
-end_date = st.sidebar.date_input("End Date", st.session_state.filters["end_date"])
-engine = st.sidebar.selectbox(
-    "Select Engine", options=["All"] + list(df['Engine'].unique()), index=0
-)
-
-# Search Button
-if st.sidebar.button("Search"):
-    st.session_state.filters = {
-        "threat_type": threat_type,
-        "start_date": start_date,
-        "end_date": end_date,
-        "engine": engine,
-    }
-    df_filtered = filter_data(
-        df,
-        threat_type=st.session_state.filters["threat_type"],
-        start_date=st.session_state.filters["start_date"],
-        end_date=st.session_state.filters["end_date"],
-        engine=st.session_state.filters["engine"],
-    )
-else:
-    df_filtered = filter_data(
-        df,
-        threat_type=st.session_state.filters["threat_type"],
-        start_date=st.session_state.filters["start_date"],
-        end_date=st.session_state.filters["end_date"],
-        engine=st.session_state.filters["engine"],
-    )
-
-# Reset Filters Button
-if st.sidebar.button("Reset Filters"):
-    st.session_state.filters = {
-        "threat_type": "All",
-        "start_date": df['Time Detected'].min(),
-        "end_date": df['Time Detected'].max(),
-        "engine": "All",
-    }
-    df_filtered = df  # Reset to full dataset
-
-# Explore Data Analysis Insight
+# Dashboard Title
+st.title('Threat Analysis Dashboard')
 
 # 1. Distribution of Threat Types
 st.write("### Distribution of Threat Types")
@@ -108,3 +50,6 @@ st.bar_chart(engine_threat_counts)
 st.write("### Engine Performance")
 engine_performance = df_filtered['Engine'].value_counts()
 st.bar_chart(engine_performance)
+
+# Display filtered data
+st.write("### Filtered Data", df_filtered)
