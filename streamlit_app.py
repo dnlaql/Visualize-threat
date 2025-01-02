@@ -26,13 +26,40 @@ if 'reset_triggered' not in st.session_state:
 # Sidebar for filters
 st.sidebar.header('Filters 🎚️')
 date_range = st.sidebar.date_input("Date Range 📅", value=st.session_state['date_range'], key='date_range')
-department = st.sidebar.selectbox('Department 🏢', ['All'] + sorted(df['Department'].unique()), index=sorted(df['Department'].unique()).index(st.session_state['department']), key='department')
-type_filter = st.sidebar.multiselect('Type 🚨', options=sorted(df['Type'].unique()), default=st.session_state['type_filter'], key='type_filter')
-status_filter = st.sidebar.multiselect('Status 📊', options=sorted(df['Status'].unique()), default=st.session_state['status_filter'], key='status_filter')
-engine_filter = st.sidebar.multiselect('Engine 🖥️', options=sorted(df['Engine'].unique()), default=st.session_state['engine_filter'], key='engine_filter')
+
+# Ensure session state value exists in the department options
+department_options = ['All'] + sorted(df['Department'].unique())
+if st.session_state['department'] not in department_options:
+    st.session_state['department'] = 'All'
+
+department = st.sidebar.selectbox(
+    'Department 🏢',
+    department_options,
+    index=department_options.index(st.session_state['department']),
+    key='department'
+)
+
+type_filter = st.sidebar.multiselect(
+    'Type 🚨',
+    options=sorted(df['Type'].unique()),
+    default=st.session_state['type_filter'],
+    key='type_filter'
+)
+status_filter = st.sidebar.multiselect(
+    'Status 📊',
+    options=sorted(df['Status'].unique()),
+    default=st.session_state['status_filter'],
+    key='status_filter'
+)
+engine_filter = st.sidebar.multiselect(
+    'Engine 🖥️',
+    options=sorted(df['Engine'].unique()),
+    default=st.session_state['engine_filter'],
+    key='engine_filter'
+)
 
 # Button to reset filters
-if st.sidebar.button('Reset Filters 🔄'):
+if st.sidebar.button('Reset Filters 🔄', key='reset_button'):
     reset_filters()
 
 # Apply filters to the data based on user selections
@@ -54,7 +81,4 @@ st.markdown("""
 Welcome to the interactive Threat Monitoring Dashboard! This tool is designed to provide insights into network security threats detected over time, enhancing monitoring and decision-making processes.
 """)
 
-# Insert visualizations and the rest of your Streamlit code here as before
-
-# Footer note on data caching
-st.info('Data is cached for performance. Adjust filters to view different slices of data.')
+# Continue with your visualizations and other components...
