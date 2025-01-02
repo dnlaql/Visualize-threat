@@ -20,14 +20,21 @@ def reset_filters():
     st.session_state['status_filter'] = []
     st.session_state['engine_filter'] = []
 
-if 'reset_triggered' not in st.session_state:
+# Ensure session state is initialized
+if 'date_range' not in st.session_state:
     reset_filters()
 
 # Sidebar for filters
 st.sidebar.header('Filters 🎚️')
-date_range = st.sidebar.date_input("Date Range 📅", value=st.session_state['date_range'], key='date_range')
 
-# Ensure session state value exists in the department options
+# Date Range Filter
+date_range = st.sidebar.date_input(
+    "Date Range 📅", 
+    value=st.session_state['date_range'], 
+    key='date_range'
+)
+
+# Department Filter
 department_options = ['All'] + sorted(df['Department'].unique())
 if st.session_state['department'] not in department_options:
     st.session_state['department'] = 'All'
@@ -39,18 +46,23 @@ department = st.sidebar.selectbox(
     key='department'
 )
 
+# Type Filter
 type_filter = st.sidebar.multiselect(
     'Type 🚨',
     options=sorted(df['Type'].unique()),
     default=st.session_state['type_filter'],
     key='type_filter'
 )
+
+# Status Filter
 status_filter = st.sidebar.multiselect(
     'Status 📊',
     options=sorted(df['Status'].unique()),
     default=st.session_state['status_filter'],
     key='status_filter'
 )
+
+# Engine Filter
 engine_filter = st.sidebar.multiselect(
     'Engine 🖥️',
     options=sorted(df['Engine'].unique()),
@@ -59,21 +71,35 @@ engine_filter = st.sidebar.multiselect(
 )
 
 # Button to reset filters
-if st.sidebar.button('Reset Filters 🔄', key='reset_button'):
+if st.sidebar.button('Reset Filters 🔄'):
     reset_filters()
 
-# Apply filters to the data based on user selections
+# Apply filters to the data
 filtered_data = df.copy()
-if date_range:
-    filtered_data = filtered_data[(filtered_data['Time Detected'] >= date_range[0]) & (filtered_data['Time Detected'] <= date_range[1])]
-if department != 'All':
-    filtered_data = filtered_data[filtered_data['Department'] == department]
-if type_filter:
-    filtered_data = filtered_data[filtered_data['Type'].isin(type_filter)]
-if status_filter:
-    filtered_data = filtered_data[filtered_data['Status'].isin(status_filter)]
-if engine_filter:
-    filtered_data = filtered_data[filtered_data['Engine'].isin(engine_filter)]
+
+# Apply Date Range Filter
+if st.session_state['date_range']:
+    start_date, end_date = st.session_state['date_range'][0], st.session_state['date_range'][1]
+    filtered_data = filtered_data[
+        (filtered_data['Time Detected'] >= pd.Timestamp(start_date)) &
+        (filtered_data['Time Detected'] <= pd.Timestamp(end_date))
+    ]
+
+# Apply Department Filter
+if st.session_state['department'] != 'All':
+    filtered_data = filtered_data[filtered_data['Department'] == st.session_state['department']]
+
+# Apply Type Filter
+if st.session_state['type_filter']:
+    filtered_data = filtered_data[filtered_data['Type'].isin(st.session_state['type_filter'])]
+
+# Apply Status Filter
+if st.session_state['status_filter']:
+    filtered_data = filtered_data[filtered_data['Status'].isin(st.session_state['status_filter'])]
+
+# Apply Engine Filter
+if st.session_state['engine_filter']:
+    filtered_data = filtered_data[filtered_data['Engine'].isin(st.session_state['engine_filter'])]
 
 # Dashboard title and introduction
 st.title('Threat Monitoring and Analysis Dashboard 🛡️')
