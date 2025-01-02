@@ -37,6 +37,23 @@ filtered_data = df[conditions]
 
 # Main dashboard title
 st.title('Threat Analysis Dashboard')
+st.markdown("""
+This interactive dashboard provides a comprehensive overview of network security threats detected over time. 
+It is designed to help IT security analysts monitor threat activity, evaluate the effectiveness of security measures, 
+and make informed decisions based on data-driven insights. 
+
+**Features:**
+- **Filter Data:** Users can dynamically filter the data based on date ranges, departments, threat types, statuses, and antivirus engines.
+- **Visualizations Include:**
+  - Distribution of threat types.
+  - Time series analysis of threat detections.
+  - Status of threat resolutions.
+  - Antivirus engine effectiveness.
+  
+**Usage:**
+- Use the sidebar to apply different filters and interact with the visualizations.
+- Hover over graphs to see additional details or trends over time.
+""")
 
 # Distribution of Threat Types
 st.subheader("Distribution of Threat Types")
